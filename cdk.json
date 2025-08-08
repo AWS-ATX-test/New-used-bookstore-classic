@@ -1,21 +1,19 @@
 {
   "app": "dotnet run --project app/Bookstore.Cdk/Bookstore.Cdk.csproj",
   "watch": {
-    "include": [
-      "**"
-    ],
+    "include": ["**"],
     "exclude": [
       "README.md",
-      "CODE_OF_CONDUCT.md",
+      "CODE_OF_CONDUCT.md", 
       "CONTRIBUTING.md",
       "LICENSE",
       "cdk*.json",
-      "app/*/obj",
-      "app/*/bin",
-      "app/*.sln",
-      "app/*/GlobalSuppressions.cs",
-      "app/*/*.csproj",
-      "media"
+      "app/*/obj/**",
+      "app/*/bin/**",
+      "**/*.sln",
+      "**/GlobalSuppressions.cs",
+      "**/*.csproj",
+      "media/**"
     ]
   },
   "context": {
@@ -27,9 +25,6 @@
     "@aws-cdk-containers/ecs-service-extensions:enableDefaultLogDriver": true,
     "@aws-cdk/aws-ec2:uniqueImdsv2TemplateName": true,
     "@aws-cdk/aws-iam:minimizePolicies": true,
-    "@aws-cdk/core:target-partitions": [
-      "aws",
-      "aws-cn"
-    ]
+    "@aws-cdk/core:target-partitions": ["aws", "aws-cn"]
   }
 }

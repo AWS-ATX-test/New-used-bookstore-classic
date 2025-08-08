@@ -1,30 +1,30 @@
-$myPath = Split-Path $MyInvocation.MyCommand.Path -Parent
+param(
+    [string]$SecretId = "SQLServerRDSSecret",
+    [string]$Database = "BookStoreClassic",
+    [string]$WebConfigPath = "..\app\Bookstore.Web\Web.config"
+)
 
-function Get-ConnectionString {
-    $sqlUsername = ((Get-SECSecretValue -SecretId "SQLServerRDSSecret").SecretString | ConvertFrom-Json).username
-    $sqlPassword = ((Get-SECSecretValue -SecretId "SQLServerRDSSecret").SecretString | ConvertFrom-Json).password
+$scriptPath = Split-Path $MyInvocation.MyCommand.Path -Parent
 
-    $endpointAddress = Get-RDSDBInstance | Select-Object -ExpandProperty Endpoint | select Address
-    [string] $SQLDatabaseEndpoint = $endpointAddress.Address
-
-    [string] $SQLDatabaseEndpointTrimmed = $SQLDatabaseEndpoint.Replace(':1433','')
-    [string] $retConnectionString = "Server=$SQLDatabaseEndpointTrimmed;Database=BookStoreClassic;User Id=$sqlUsername;Password=$sqlPassword;"
-    return $retConnectionString
-}
-
-function Update-ConnectionString-WebConfig {
-    param (
-        [string] $connectionStringParam,
-        [string] $webConfigPathParam
-    )
+try {
+    # Get credentials from AWS Secrets Manager
+    $secret = (Get-SECSecretValue -SecretId $SecretId).SecretString | ConvertFrom-Json
     
-    $webConfigPathParam = Join-Path $myPath $webConfigPathParam
-    $webConfigXml = [xml](Get-Content -Path $webConfigPathParam)
-    $webConfigXml.configuration.connectionStrings.add.connectionString = $connectionStringParam
-    $webConfigXml.Save($webConfigPathParam)
+    # Get RDS endpoint
+    $endpoint = (Get-RDSDBInstance | Select-Object -First 1).Endpoint.Address -replace ':1433$'
+    
+    # Build connection string
+    $connectionString = "Server=$endpoint;Database=$Database;User Id=$($secret.username);Password=$($secret.password);"
+    
+    # Update web.config
+    $configPath = Join-Path $scriptPath $WebConfigPath
+    $xml = [xml](Get-Content $configPath)
+    $xml.configuration.connectionStrings.add.connectionString = $connectionString
+    $xml.Save($configPath)
+    
+    Write-Host "Connection string updated successfully" -ForegroundColor Green
 }
-
-$connectionString = Get-ConnectionString
-$webConfig1 = "..\app\Bookstore.Web\Web.config"
-
-Update-ConnectionString-WebConfig -connectionStringParam $connectionString -webConfigPathParam $webConfig1
+catch {
+    Write-Error "Failed to update connection string: $($_.Exception.Message)"
+    exit 1
+}
