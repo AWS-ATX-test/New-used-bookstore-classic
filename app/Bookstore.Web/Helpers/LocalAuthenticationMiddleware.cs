@@ -1,13 +1,15 @@
-﻿using System;
-using Microsoft.Owin;
+using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Web;
 using Bookstore.Domain.Customers;
+using Microsoft.AspNetCore.Owin;
+using Microsoft.Owin;
+
 
 namespace Bookstore.Web.Helpers
 {
-    public class LocalAuthenticationMiddleware : OwinMiddleware
+public class LocalAuthenticationMiddleware : Microsoft.Owin.OwinMiddleware
     {
         private const string UserId = "FB6135C7-1464-4A72-B74E-4B63D343DD09";
 
