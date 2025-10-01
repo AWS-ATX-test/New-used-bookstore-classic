@@ -1,9 +1,12 @@
-﻿using System;
-using Microsoft.Owin;
+using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Web;
 using Bookstore.Domain.Customers;
+using Microsoft.AspNetCore.Owin;
+using Microsoft.Owin;
+using Owin;
+
 
 namespace Bookstore.Web.Helpers
 {
