@@ -1,7 +1,8 @@
-﻿using Microsoft.Owin;
+using Microsoft.AspNetCore.Owin;
 using Owin;
 
-[assembly: OwinStartup(typeof(Bookstore.Web.Startup))]
+
+
 
 namespace Bookstore.Web
 {
@@ -9,13 +10,7 @@ namespace Bookstore.Web
     {
         public void Configuration(IAppBuilder app)
         {
-            LoggingSetup.ConfigureLogging();
 
-            ConfigurationSetup.ConfigureConfiguration();
-
-            DependencyInjectionSetup.ConfigureDependencyInjection(app);
-
-            AuthenticationConfig.ConfigureAuthentication(app);
         }
     }
 }
