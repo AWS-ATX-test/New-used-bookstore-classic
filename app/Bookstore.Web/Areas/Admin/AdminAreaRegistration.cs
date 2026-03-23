@@ -1,24 +1,13 @@
-﻿using System.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
+
 
 namespace Bookstore.Web.Areas
 {
-    public class AdminAreaRegistration : AreaRegistration 
+    public class AdminAreaRegistration
     {
-        public override string AreaName 
-        {
-            get 
-            {
-                return "Admin";
-            }
-        }
+        public const string AreaName = "Admin";
 
-        public override void RegisterArea(AreaRegistrationContext context) 
-        {
-            context.MapRoute(
-                "Admin_default",
-                "Admin/{controller}/{action}/{id}",
-                new { action = "Index", id = UrlParameter.Optional }, namespaces: new[] { "Bookstore.Web.Areas.Admin.Controllers" }
-            );
-        }
+        // Area registration is now handled in Program.cs via endpoint routing        // Example configuration:
+        // endpoints.MapAreaControllerRoute("Admin_default", "Admin_default", "{controller=Home}/{action=Index}/{id?}");
     }
 }

@@ -1,7 +1,6 @@
-﻿using System.IO;
+using System.IO;
 using System.Reflection;
 using System.Web;
-using System.Web.Mvc;
 using Amazon.Rekognition;
 using Amazon.S3;
 using Autofac;
@@ -21,13 +20,16 @@ using Bookstore.Domain.Offers;
 using Bookstore.Domain.Orders;
 using Bookstore.Domain.ReferenceData;
 using Bookstore.Web.Helpers;
-using Owin;
+using Microsoft.AspNetCore.Mvc;
+
+using Microsoft.AspNetCore.Builder;
+
 
 namespace Bookstore.Web
 {
     public static class DependencyInjectionSetup
     {
-        public static void ConfigureDependencyInjection(IAppBuilder app)
+        public static void ConfigureDependencyInjection(IApplicationBuilder app)
         {
             var builder = new ContainerBuilder();
 
@@ -86,7 +88,8 @@ namespace Bookstore.Web
 
             var container = builder.Build();
 
-            DependencyResolver.SetResolver(new AutofacDependencyResolver(container));
+            /* Added by CTA: This method is not supported. Use the startup class to register dependency containers */
+DependencyResolver.SetResolver(new AutofacDependencyResolver(container));
 
             app.UseAutofacMiddleware(container);
         }

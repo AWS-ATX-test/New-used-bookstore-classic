@@ -1,0 +1,48 @@
+using System.Security.Claims;
+using System.Threading.Tasks;
+using Autofac;
+using Autofac.Integration.Owin;
+using BobsBookstoreClassic.Data;
+using Bookstore.Domain.Customers;
+using Bookstore.Web.Helpers;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authentication.Cookies;
+
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+
+using Microsoft.AspNetCore.Builder;
+
+
+namespace Bookstore.Web
+{
+    public static class AuthenticationConfig
+    {
+        public static void ConfigureAuthentication(IApplicationBuilder app)
+        {
+            if (BookstoreConfiguration.GetSetting("Services/Authentication") == "aws")
+            {
+                ConfigureCognitoAuthentication(app);
+            }
+            else
+            {
+                ConfigureLocalAuthentication(app);
+            }
+        }
+
+        private static void ConfigureLocalAuthentication(IApplicationBuilder app)
+        {
+            app.UseMiddlewareFromContainer<LocalAuthenticationMiddleware>();
+        }
+
+        private static void ConfigureCognitoAuthentication(IApplicationBuilder app)
+        {
+            app.SetDefaultSignInAsAuthenticationType(CookieAuthenticationDefaults.AuthenticationType);
+
+            app.UseCookieAuthentication(new CookieAuthenticationOptions());
+
+            /* Added by CTA: Please add services.AddAuthentication().AddOpenIdConnect(); inside of your public void ConfigureServices(IServiceCollection services) method. You can also optionally add your OpenIdConnectOptions. */
+app.UseAuthentication();
+        }
+    }
+}
