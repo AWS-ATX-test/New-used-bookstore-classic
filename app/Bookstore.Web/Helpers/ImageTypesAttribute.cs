@@ -2,28 +2,32 @@
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
-using System.Web;
+using Microsoft.AspNetCore.Http;
 
 namespace Bookstore.Web.Helpers
 {
+    /// <summary>
+    /// Validates that an uploaded file is one of the allowed image types.
+    /// Replaces the legacy version that used System.Web.HttpPostedFileBase.
+    /// </summary>
     public class ImageTypesAttribute : ValidationAttribute
     {
-        private readonly string[] imageTypes;
+        private readonly string[] _imageTypes;
 
         public ImageTypesAttribute(string[] imageTypes)
         {
-            this.imageTypes = imageTypes;
+            _imageTypes = imageTypes;
         }
 
         public override bool IsValid(object value)
         {
             if (value == null) return true;
 
-            if (!(value is HttpPostedFileBase file)) return base.IsValid(value);
+            if (value is not IFormFile file) return base.IsValid(value);
 
             var extension = Path.GetExtension(file.FileName);
 
-            return imageTypes.Contains(extension, StringComparer.OrdinalIgnoreCase);
+            return _imageTypes.Contains(extension, StringComparer.OrdinalIgnoreCase);
         }
 
         public override string FormatErrorMessage(string name)

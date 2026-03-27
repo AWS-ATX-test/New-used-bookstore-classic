@@ -2,7 +2,7 @@
 using Bookstore.Web.Areas.Admin.Models.Inventory;
 using Bookstore.Domain.Books;
 using Bookstore.Domain.ReferenceData;
-using System.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Bookstore.Web.Areas.Admin.Controllers
 {
@@ -45,18 +45,18 @@ namespace Bookstore.Web.Areas.Admin.Controllers
             if (!ModelState.IsValid) return await InvalidCreateUpdateView(model);
 
             var dto = new CreateBookDto(
-                model.Name, 
-                model.Author, 
-                model.SelectedBookTypeId, 
-                model.SelectedConditionId, 
-                model.SelectedGenreId, 
-                model.SelectedPublisherId, 
-                model.Year, 
-                model.ISBN, 
-                model.Summary, 
-                model.Price, 
-                model.Quantity, 
-                model.CoverImage?.InputStream, 
+                model.Name,
+                model.Author,
+                model.SelectedBookTypeId,
+                model.SelectedConditionId,
+                model.SelectedGenreId,
+                model.SelectedPublisherId,
+                model.Year,
+                model.ISBN,
+                model.Summary,
+                model.Price,
+                model.Quantity,
+                model.CoverImage?.OpenReadStream(),
                 model.CoverImage?.FileName);
 
             var result = await bookService.AddAsync(dto);
@@ -90,7 +90,7 @@ namespace Bookstore.Web.Areas.Admin.Controllers
                 model.Summary,
                 model.Price,
                 model.Quantity,
-                model.CoverImage?.InputStream,
+                model.CoverImage?.OpenReadStream(),
                 model.CoverImage?.FileName);
 
             var result = await bookService.UpdateAsync(dto);

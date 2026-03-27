@@ -1,46 +1,56 @@
 ﻿using System;
-using System.Web;
-using System.Web.Mvc;
-using BobsBookstoreClassic.Data;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 
 namespace Bookstore.Web.Controllers
 {
+    [AllowAnonymous]
     public class AuthenticationController : Controller
     {
-        public ActionResult Login(string redirectUri = null)
+        private readonly IConfiguration _configuration;
+
+        public AuthenticationController(IConfiguration configuration)
         {
-            if(string.IsNullOrWhiteSpace(redirectUri)) return RedirectToAction("Index", "Home");
+            _configuration = configuration;
+        }
+
+        public IActionResult Login(string redirectUri = null)
+        {
+            if (string.IsNullOrWhiteSpace(redirectUri))
+                return RedirectToAction("Index", "Home");
 
             return Redirect(redirectUri);
         }
 
-        public ActionResult LogOut()
+        public IActionResult LogOut()
         {
-            return BookstoreConfiguration.GetSetting("Services/Authentication") == "aws" ? CognitoSignOut() : LocalSignOut();
+            return _configuration["Services/Authentication"] == "aws"
+                ? CognitoSignOut()
+                : LocalSignOut();
         }
 
-        private ActionResult LocalSignOut()
+        private IActionResult LocalSignOut()
         {
-            if (HttpContext.Request.Cookies["LocalAuthentication"] != null)
-            {
-                HttpContext.Response.Cookies.Add(new HttpCookie("LocalAuthentication") { Expires = DateTime.Now.AddDays(-1) });
-            }
+            // Delete the local authentication cookie
+            Response.Cookies.Delete("LocalAuthentication");
 
             return RedirectToAction("Index", "Home");
         }
 
-        private ActionResult CognitoSignOut()
+        private IActionResult CognitoSignOut()
         {
-            if (Request.Cookies[".AspNet.Cookies"] != null)
-            {
-                Response.Cookies.Add(new HttpCookie(".AspNet.Cookies") { Expires = DateTime.Now.AddDays(-1) });
-            }
-
-            var domain = BookstoreConfiguration.GetSetting("Authentication/Cognito/CognitoDomain");
-            var clientId = BookstoreConfiguration.GetSetting("Authentication/Cognito/LocalClientId");
-            var logoutUri = $"{Request.Url.Scheme}://{Request.Url.Host}:{Request.Url.Port}/";
-
-            return Redirect($"{domain}/logout?client_id={clientId}&logout_uri={logoutUri}");
+            // Sign out of both the cookie and the OIDC session
+            return SignOut(
+                new AuthenticationProperties
+                {
+                    RedirectUri = Url.Action("Index", "Home")
+                },
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                OpenIdConnectDefaults.AuthenticationScheme);
         }
     }
 }

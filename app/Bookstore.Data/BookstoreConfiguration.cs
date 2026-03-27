@@ -1,63 +1,38 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 
 namespace BobsBookstoreClassic.Data
 {
+    /// <summary>
+    /// Thin adapter over ASP.NET Core IConfiguration that preserves the
+    /// GetSetting / GetConnectionString API used across the application.
+    /// Replaces the legacy version that relied on System.Configuration.ConfigurationManager.
+    /// </summary>
     public sealed class BookstoreConfiguration
     {
-        private static readonly Lazy<BookstoreConfiguration> Lazy = new Lazy<BookstoreConfiguration>(() => new BookstoreConfiguration());
+        private static IConfiguration _configuration;
 
-        private static BookstoreConfiguration Instance => Lazy.Value;
-
-        private readonly Dictionary<string, string> _appSettings = new Dictionary<string, string>();
-        private readonly Dictionary<string, string> _connectionStrings = new Dictionary<string, string>();
-
-        private BookstoreConfiguration()
+        /// <summary>
+        /// Must be called once at application startup (e.g. in Program.cs) before
+        /// any call to GetSetting / GetConnectionString.
+        /// </summary>
+        public static void Initialize(IConfiguration configuration)
         {
-            foreach (string key in ConfigurationManager.AppSettings)
-            {
-                _appSettings[key] = ConfigurationManager.AppSettings[key];
-
-                if (Environment.GetEnvironmentVariable(key) != null)
-                {
-                    _appSettings[key] = Environment.GetEnvironmentVariable(key);
-                }
-            }
-
-            foreach (ConnectionStringSettings connectionStringSettings in ConfigurationManager.ConnectionStrings)
-            {
-                _connectionStrings[connectionStringSettings.Name] = connectionStringSettings.ConnectionString;
-
-            }
-        }
-
-        public static void AddSetting(string key, string value)
-        {
-            Instance._appSettings[key] = value;
+            _configuration = configuration;
         }
 
         public static string GetSetting(string key)
         {
-            return Instance._appSettings[key];
+            return _configuration?[key];
         }
 
         public static T GetSetting<T>(string key)
         {
-            var value = Instance._appSettings[key];
-
-            return (T)Convert.ChangeType(value, typeof(T));
-        }
-
-        public static void AddConnectionString(string key, string value)
-        {
-            Instance._connectionStrings[key] = value;
+            return _configuration!.GetValue<T>(key);
         }
 
         public static string GetConnectionString(string key)
         {
-            return Instance._connectionStrings[key];
+            return _configuration?.GetConnectionString(key);
         }
-
     }
 }

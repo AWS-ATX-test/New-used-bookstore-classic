@@ -1,32 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
-using System.Web.SessionState;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Bookstore.Web.Helpers
 {
+    /// <summary>
+    /// ASP.NET Core MVC helper extensions.
+    /// Replaces the legacy version that used System.Web.Mvc.HtmlHelper.
+    /// </summary>
     public static class MvcHelpers
     {
-        public static IEnumerable<SelectListItem> GetSelectListForEnum<T>(this HtmlHelper html, string emptyItem = null)
+        public static IEnumerable<SelectListItem> GetSelectListForEnum<T>(this IHtmlHelper html, string emptyItem = null)
             where T : Enum
         {
             if (!string.IsNullOrEmpty(emptyItem))
             {
-                yield return new SelectListItem()
-                {
-                    Text = emptyItem
-                };
+                yield return new SelectListItem { Text = emptyItem };
             }
+
             foreach (var val in Enum.GetValues(typeof(T)))
             {
-                yield return new SelectListItem()
+                yield return new SelectListItem
                 {
                     Text = Enum.GetName(typeof(T), val)
                 };
             }
-
         }
     }
 }
